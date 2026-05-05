@@ -101,3 +101,35 @@ sentence_count: <N>
 <여기에 사용자가 원문 MD 파일 내용을 붙여넣음>
 
 위 규칙대로 `<원본명>.learn.md` **전체 내용**을 출력하라. 코드펜스로 감싸지 말고, frontmatter부터 바로 시작.
+
+## 출력 후 필수 후처리 (Post-generation steps)
+
+학습자료 마크다운을 생성한 뒤 EngReader 앱에서 즉시 노출되도록 **반드시 아래 두 파일을 모두 같은 위치에 저장**하라.
+
+**저장 위치 (고정)**: `/Users/jeongseongchae/dev/tools/eng_learning_app/content/`
+
+이 루트 아래에 원문이 있던 폴더 구조를 그대로 보존한다. 예를 들어 원문이 `~/somewhere/KN/Khp/khp9.md`였다면:
+
+```
+/Users/jeongseongchae/dev/tools/eng_learning_app/content/KN/Khp/khp9.md         ← 원문 복사본
+/Users/jeongseongchae/dev/tools/eng_learning_app/content/KN/Khp/khp9.learn.md   ← 방금 생성한 학습자료
+```
+
+### 체크리스트
+
+1. **원문 복사**: 원문 `<원본명>.md`를 `/Users/jeongseongchae/dev/tools/eng_learning_app/content/<카테고리경로>/<원본명>.md`로 복사한다 (이미 같은 자리에 있으면 스킵).
+2. **학습자료 저장**: 방금 출력한 학습자료를 `/Users/jeongseongchae/dev/tools/eng_learning_app/content/<카테고리경로>/<원본명>.learn.md`로 저장한다.
+3. **짝짓기 확인**: 같은 디렉토리에 `<원본명>.md`와 `<원본명>.learn.md`가 모두 존재하는지 확인한다. 둘 중 하나만 있으면 앱에서 ⚠️ 처리되거나 누락되므로 반드시 두 파일 모두 있어야 한다.
+
+### Claude Code에서 사용 시 명령 예시
+
+```bash
+# 1. 원문 복사
+mkdir -p /Users/jeongseongchae/dev/tools/eng_learning_app/content/<카테고리경로>
+cp <원문절대경로>.md /Users/jeongseongchae/dev/tools/eng_learning_app/content/<카테고리경로>/
+
+# 2. 학습자료 쓰기 (Write 도구 사용)
+#    경로: /Users/jeongseongchae/dev/tools/eng_learning_app/content/<카테고리경로>/<원본명>.learn.md
+```
+
+이 두 단계가 끝나야 사용자가 `pnpm build` 또는 `pnpm dev`로 사이트에 반영할 수 있다.
