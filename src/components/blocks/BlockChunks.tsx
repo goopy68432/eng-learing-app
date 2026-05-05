@@ -16,7 +16,7 @@ export function BlockChunks({ chunks, note }: { chunks: ChunkSpan[]; note: strin
         {chunks.map((c, i) => (
           <span key={i}>
             <span className={`px-1.5 py-0.5 rounded ${PALETTE[i % PALETTE.length]}`}>{c.text}</span>
-            {i < chunks.length - 1 && <span className="text-slate-400 mx-1">//</span>}
+            {i < chunks.length - 1 && <span className="text-slate-400 mx-1">{'//'}</span>}
           </span>
         ))}
       </p>
