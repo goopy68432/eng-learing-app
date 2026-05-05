@@ -199,7 +199,7 @@ const config: Config = {
       fontFamily: {
         serif: ['"Source Serif 4"', '"Noto Serif KR"', 'Georgia', '"Iowan Old Style"', 'serif'],
         sans: ['Inter', '"Wanted Sans Variable"', 'Pretendard', '-apple-system', 'system-ui', 'sans-serif'],
-        mono: ['"JetBrains Mono"', 'ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
+        mono: ['"D2Coding"', '"JetBrains Mono"', 'ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
       },
       maxWidth: { prose: '48rem' },
     },
@@ -213,11 +213,12 @@ export default config;
 
 ```css
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap");
+@import url("https://cdn.jsdelivr.net/gh/wan2land/d2coding/d2coding.css");
 
 :root {
   --font-serif: "Source Serif 4", "Noto Serif KR", Georgia, "Iowan Old Style", serif;
   --font-sans: "Inter", "Wanted Sans Variable", "Pretendard", -apple-system, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --font-mono: "D2Coding", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
 }
 ```
 

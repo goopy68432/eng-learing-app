@@ -13,15 +13,16 @@
         fontFamily: {
           serif: ['"Source Serif 4"', '"Noto Serif KR"', 'Georgia', '"Iowan Old Style"', 'serif'],
           sans: ['Inter', '"Wanted Sans Variable"', 'Pretendard', '-apple-system', 'system-ui', 'sans-serif'],
-          mono: ['"JetBrains Mono"', 'ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
+          mono: ['"D2Coding"', '"JetBrains Mono"', 'ui-monospace', '"SF Mono"', 'Menlo', 'monospace'],
         },
       },
     },
   };
 </script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://cdn.jsdelivr.net/gh/wan2land/d2coding/d2coding.css" rel="stylesheet">
 <style>
-  /* openbook 폰트 시스템과 동일 — body 기본 serif, UI는 sans, 코드는 mono */
+  /* openbook 폰트 시스템 + Naver D2Coding (mono) */
   body {
     font-family: "Source Serif 4", "Noto Serif KR", Georgia, "Iowan Old Style", serif;
     -webkit-font-smoothing: antialiased;
@@ -29,7 +30,8 @@
   }
   /* UI chrome은 sans */
   aside, header nav, button, kbd, .reveal-btn, .ui-sans { font-family: "Inter", "Wanted Sans Variable", "Pretendard", system-ui, sans-serif; }
-  code, .font-mono { font-family: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
+  /* 코드/청크는 D2Coding 우선 — 한글·영문 혼용 시 너비 정렬 우수, 영문 fallback은 JetBrains Mono */
+  code, .font-mono, kbd { font-family: "D2Coding", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
   .sentence-original { font-family: "Source Serif 4", "Noto Serif KR", Georgia, serif; font-feature-settings: "liga", "kern"; }
   .chunk-pipe { color: #94a3b8; margin: 0 .35rem; }
   .vocab-underline { border-bottom: 1px dotted #94a3b8; cursor: help; }

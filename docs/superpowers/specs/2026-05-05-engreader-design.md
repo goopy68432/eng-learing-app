@@ -256,7 +256,7 @@ openbook(`/Users/jeongseongchae/dev/tools/openbook`) 폰트 시스템을 그대�
 |---|---|
 | 본문 (원문, 한국어 번역/감각) | `Source Serif 4`, `Noto Serif KR`, Georgia |
 | UI · 메타 라벨 | `Inter`, `Wanted Sans Variable`, `Pretendard` |
-| 청크 · 코드 | `JetBrains Mono` |
+| 청크 · 코드 | `D2Coding` (Naver, 한글·영문 혼용 정렬 우수) → fallback `JetBrains Mono` |
 
 색상은 Tailwind slate 기본 + indigo/purple/emerald/amber 액센트, 다크모드(`next-themes`)는 slate-950 배경.
 
