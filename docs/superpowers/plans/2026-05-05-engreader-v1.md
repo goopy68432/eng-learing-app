@@ -219,7 +219,12 @@ export default config;
   --font-serif: "Source Serif 4", "Noto Serif KR", Georgia, "Iowan Old Style", serif;
   --font-sans: "Inter", "Wanted Sans Variable", "Pretendard", -apple-system, system-ui, sans-serif;
   --font-mono: "D2Coding", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+  --fs-body: 1.125rem;
 }
+
+[data-fontsize="sm"] { --fs-body: 1rem; }
+[data-fontsize="md"] { --fs-body: 1.125rem; }
+[data-fontsize="lg"] { --fs-body: 1.375rem; }
 ```
 
 - [ ] **Step 7: Create `src/app/globals.css`**
@@ -234,6 +239,7 @@ html { font-family: var(--font-serif); -webkit-font-smoothing: antialiased; }
 body { margin: 0; }
 button, kbd, .ui-sans, aside, header nav { font-family: var(--font-sans); }
 code, .font-mono { font-family: var(--font-mono); }
+.sentence-original { font-size: var(--fs-body); }
 ```
 
 - [ ] **Step 8: Create `src/app/layout.tsx` (placeholder, will expand later)**
@@ -905,7 +911,7 @@ import { useUserStore } from '@/lib/store';
 
 describe('useUserStore', () => {
   beforeEach(() => {
-    useUserStore.setState({ read: {}, bookmarked: {}, vocab: {} });
+    useUserStore.setState({ read: {}, bookmarked: {}, vocab: {}, fontSize: 'md' });
     localStorage.clear();
   });
 
@@ -936,6 +942,33 @@ describe('useUserStore', () => {
     expect(raw).toBeTruthy();
     expect(JSON.parse(raw!).state.read.a).toBe(true);
   });
+
+  it('defaults fontSize to md', () => {
+    expect(useUserStore.getState().fontSize).toBe('md');
+  });
+
+  it('sets fontSize and persists', () => {
+    useUserStore.getState().setFontSize('lg');
+    expect(useUserStore.getState().fontSize).toBe('lg');
+    const raw = localStorage.getItem('engreader:user-state:v1');
+    expect(JSON.parse(raw!).state.fontSize).toBe('lg');
+  });
+
+  it('cycleFontSize advances sm → md → lg → sm', () => {
+    useUserStore.getState().setFontSize('sm');
+    useUserStore.getState().cycleFontSize(1);
+    expect(useUserStore.getState().fontSize).toBe('md');
+    useUserStore.getState().cycleFontSize(1);
+    expect(useUserStore.getState().fontSize).toBe('lg');
+    useUserStore.getState().cycleFontSize(1);
+    expect(useUserStore.getState().fontSize).toBe('sm');
+  });
+
+  it('cycleFontSize(-1) goes backwards', () => {
+    useUserStore.getState().setFontSize('md');
+    useUserStore.getState().cycleFontSize(-1);
+    expect(useUserStore.getState().fontSize).toBe('sm');
+  });
 });
 ```
 
@@ -951,14 +984,20 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { VocabEntry } from './types';
 
+export type FontSize = 'sm' | 'md' | 'lg';
+const FONT_ORDER: FontSize[] = ['sm', 'md', 'lg'];
+
 type UserState = {
   read: Record<string, boolean>;
   bookmarked: Record<string, boolean>;
   vocab: Record<string, VocabEntry>;
+  fontSize: FontSize;
   toggleRead: (sentenceId: string) => void;
   toggleBookmark: (sentenceId: string) => void;
   addVocab: (word: string, entry: VocabEntry) => void;
   removeVocab: (word: string) => void;
+  setFontSize: (size: FontSize) => void;
+  cycleFontSize: (direction: 1 | -1) => void;
 };
 
 export const useUserStore = create<UserState>()(
@@ -967,6 +1006,7 @@ export const useUserStore = create<UserState>()(
       read: {},
       bookmarked: {},
       vocab: {},
+      fontSize: 'md',
       toggleRead: (id) =>
         set((s) => {
           const next = { ...s.read };
@@ -988,6 +1028,13 @@ export const useUserStore = create<UserState>()(
           const next = { ...s.vocab };
           delete next[word];
           return { vocab: next };
+        }),
+      setFontSize: (size) => set({ fontSize: size }),
+      cycleFontSize: (direction) =>
+        set((s) => {
+          const i = FONT_ORDER.indexOf(s.fontSize);
+          const next = FONT_ORDER[(i + direction + FONT_ORDER.length) % FONT_ORDER.length];
+          return { fontSize: next };
         }),
     }),
     { name: 'engreader:user-state:v1' }
@@ -1245,7 +1292,7 @@ export function SentenceCard({ sentence, stageOverride, onStageChange }: Props) 
     >
       <div className="flex items-start gap-3">
         <span className="text-xs font-mono text-slate-400 mt-1.5 w-6 shrink-0">S{sentence.index}</span>
-        <p className="text-lg leading-relaxed flex-1">{sentence.original}</p>
+        <p className="sentence-original leading-relaxed flex-1">{sentence.original}</p>
         <div className="flex items-center gap-1">
           <button
             aria-label="북마크"
@@ -1323,7 +1370,8 @@ export type Action =
   | { type: 'collapse-all' }
   | { type: 'toggle-bookmark' }
   | { type: 'toggle-read' }
-  | { type: 'toggle-help' };
+  | { type: 'toggle-help' }
+  | { type: 'font-size'; direction: 1 | -1 };
 
 export function keyToAction(key: string): Action | null {
   switch (key) {
@@ -1337,6 +1385,8 @@ export function keyToAction(key: string): Action | null {
     case 'b': return { type: 'toggle-bookmark' };
     case ' ': return { type: 'toggle-read' };
     case '?': return { type: 'toggle-help' };
+    case '+': case '=': return { type: 'font-size', direction: 1 };
+    case '-': case '_': return { type: 'font-size', direction: -1 };
     default: return null;
   }
 }
@@ -1419,6 +1469,7 @@ export function SentenceList({ sentences }: { sentences: Sentence[] }) {
 
   const toggleRead = useUserStore((s) => s.toggleRead);
   const toggleBookmark = useUserStore((s) => s.toggleBookmark);
+  const cycleFontSize = useUserStore((s) => s.cycleFontSize);
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
@@ -1439,11 +1490,12 @@ export function SentenceList({ sentences }: { sentences: Sentence[] }) {
         case 'toggle-read': toggleRead(sentences[focus].id); break;
         case 'toggle-bookmark': toggleBookmark(sentences[focus].id); break;
         case 'toggle-help': /* handled by KeyboardHelp in Task 8 */ break;
+        case 'font-size': cycleFontSize(action.direction); break;
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [focus, sentences, toggleRead, toggleBookmark]);
+  }, [focus, sentences, toggleRead, toggleBookmark, cycleFontSize]);
 
   return (
     <div className="space-y-5">
@@ -1474,26 +1526,28 @@ git commit -m "feat(ui): SentenceList with keyboard shortcuts"
 
 ---
 
-## Task 8: Theme provider, KeyboardHelp modal, ReaderHeader
+## Task 8: Theme provider, FontSize control, KeyboardHelp, ReaderHeader
 
 **Files:**
-- Create: `src/components/ThemeToggle.tsx`, `src/components/KeyboardHelp.tsx`, `src/components/ReaderHeader.tsx`
+- Create: `src/components/ThemeToggle.tsx`, `src/components/FontSizeApplier.tsx`, `src/components/FontSizeToggle.tsx`, `src/components/KeyboardHelp.tsx`, `src/components/ReaderHeader.tsx`
 - Modify: `src/app/layout.tsx`
 
-- [ ] **Step 1: Update `src/app/layout.tsx` to add ThemeProvider**
+- [ ] **Step 1: Update `src/app/layout.tsx` to add ThemeProvider + FontSizeApplier**
 
 ```tsx
 import './globals.css';
 import type { ReactNode } from 'react';
 import { ThemeProvider } from 'next-themes';
+import { FontSizeApplier } from '@/components/FontSizeApplier';
 
 export const metadata = { title: 'EngReader', description: 'Sentence-level English reading study viewer' };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
+    <html lang="ko" suppressHydrationWarning data-fontsize="md">
       <body className="bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          <FontSizeApplier />
           {children}
         </ThemeProvider>
       </body>
@@ -1527,6 +1581,63 @@ export function ThemeToggle() {
 }
 ```
 
+- [ ] **Step 2.5: Create `src/components/FontSizeApplier.tsx`** (syncs store → `<html data-fontsize>`)
+
+```tsx
+'use client';
+import { useEffect } from 'react';
+import { useUserStore } from '@/lib/store';
+
+export function FontSizeApplier() {
+  const fontSize = useUserStore((s) => s.fontSize);
+  useEffect(() => {
+    document.documentElement.dataset.fontsize = fontSize;
+  }, [fontSize]);
+  return null;
+}
+```
+
+- [ ] **Step 2.6: Create `src/components/FontSizeToggle.tsx`** (3-button group for sidebar)
+
+```tsx
+'use client';
+import { useUserStore, type FontSize } from '@/lib/store';
+
+const SIZES: { value: FontSize; label: string; ariaLabel: string }[] = [
+  { value: 'sm', label: '가', ariaLabel: '작게' },
+  { value: 'md', label: '가', ariaLabel: '보통' },
+  { value: 'lg', label: '가', ariaLabel: '크게' },
+];
+
+export function FontSizeToggle() {
+  const fontSize = useUserStore((s) => s.fontSize);
+  const setFontSize = useUserStore((s) => s.setFontSize);
+  return (
+    <div className="flex items-center gap-1 px-2 py-1.5 ui-sans" role="group" aria-label="본문 글자크기">
+      <span className="text-xs text-slate-500 mr-1">크기</span>
+      {SIZES.map((s, i) => {
+        const active = fontSize === s.value;
+        const sizeClass = s.value === 'sm' ? 'text-xs' : s.value === 'md' ? 'text-sm' : 'text-base';
+        return (
+          <button
+            key={s.value}
+            type="button"
+            aria-label={s.ariaLabel}
+            aria-pressed={active}
+            onClick={() => setFontSize(s.value)}
+            className={`${sizeClass} w-7 h-7 rounded grid place-items-center transition-colors ${
+              active
+                ? 'bg-indigo-100 text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300'
+                : 'text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+            }`}
+          >{s.label}</button>
+        );
+      })}
+    </div>
+  );
+}
+```
+
 - [ ] **Step 3: Create `src/components/KeyboardHelp.tsx`**
 
 ```tsx
@@ -1539,6 +1650,7 @@ const ROWS: [string, string][] = [
   ['e / c', '모두 펼치기 / 접기'],
   ['b', '북마크 토글'],
   ['space', '읽음 토글'],
+  ['+ / -', '본문 글자 크게 / 작게'],
   ['?', '이 도움말'],
 ];
 
@@ -1690,6 +1802,7 @@ import path from 'node:path';
 import { loadAllContent } from '@/lib/content';
 import { FolderNode, buildTree } from './FolderNode';
 import { ThemeToggle } from './ThemeToggle';
+import { FontSizeToggle } from './FontSizeToggle';
 
 export async function Sidebar() {
   const docs = await loadAllContent(path.resolve(process.cwd(), 'content'));
@@ -1709,6 +1822,7 @@ export async function Sidebar() {
       <div className="border-t border-slate-200 dark:border-slate-800 p-2 space-y-0.5 text-sm">
         <Link href="/bookmarks" className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">⭐ <span>Bookmarks</span></Link>
         <Link href="/vocab" className="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">📚 <span>Vocab</span></Link>
+        <FontSizeToggle />
         <ThemeToggle />
       </div>
     </aside>
@@ -2187,7 +2301,8 @@ git push
 | §8.5 어휘 인터랙션 (단어장 ⭐) | Task 6 (BlockVocab) |
 | §9 컴포넌트 트리 | Tasks 6-11 |
 | §10.1 빌드 시점 데이터 | Tasks 2, 4 |
-| §10.2 런타임 상태 | Task 5 |
+| §10.2 런타임 상태 (read/bookmark/vocab/fontSize) | Task 5 |
+| §10.2 폰트 크기 적용 (data-fontsize, --fs-body) | Tasks 1, 8 (FontSizeApplier, FontSizeToggle) |
 | §11 디자인 시스템 (폰트) | Task 1 |
 | §13 기술 스택 | Task 1 |
 | §14 테스트 전략 | Tasks 2, 3, 4, 5, 6, 7, 12, 13 |

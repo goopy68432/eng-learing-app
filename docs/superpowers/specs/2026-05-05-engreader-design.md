@@ -244,8 +244,17 @@ type UserState = {
     sourceSentenceId: string;
     addedAt: string;
   }>;
+  fontSize: 'sm' | 'md' | 'lg';             // 본문 문장 크기 (기본 'md')
 };
 ```
+
+**폰트 크기**: `<html data-fontsize="md">` 속성으로 적용. CSS에서 속성 셀렉터로 `--fs-body` 변수 변경:
+```css
+[data-fontsize="sm"] { --fs-body: 1rem; }       /* 16px */
+[data-fontsize="md"] { --fs-body: 1.125rem; }   /* 18px (default) */
+[data-fontsize="lg"] { --fs-body: 1.375rem; }   /* 22px */
+```
+`.sentence-original`에만 `font-size: var(--fs-body)` 적용. UI/메타 라벨은 고정 크기 유지(시각적 위계 보존).
 **Reveal 단계는 메모리 only** — 매 세션 fresh하게 시작(능동 학습 의도).
 
 ## 11. 디자인 시스템
@@ -295,7 +304,8 @@ openbook(`/Users/jeongseongchae/dev/tools/openbook`) 폰트 시스템을 그대�
 - 점진 reveal (Stage 0/1/2)
 - 6블록 학습자료 렌더링
 - 다크모드, 진도(읽음), 북마크, 단어장
-- 키보드 단축키 (j/k/0/1/2/e/c/b/space/?)
+- 본문 글자크기 환경설정 (sm/md/lg 3단계, 사이드바 토글, persist)
+- 키보드 단축키 (j/k/0/1/2/e/c/b/space/?, +/- 글자크기)
 - 짝 누락 감지 + 안내 페이지
 - LLM 프롬프트 템플릿 `prompts/generate-learn-md.md`
 - Vercel 배포 가능 상태

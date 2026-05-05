@@ -32,7 +32,16 @@
   aside, header nav, button, kbd, .reveal-btn, .ui-sans { font-family: "Inter", "Wanted Sans Variable", "Pretendard", system-ui, sans-serif; }
   /* 코드/청크는 D2Coding 우선 — 한글·영문 혼용 시 너비 정렬 우수, 영문 fallback은 JetBrains Mono */
   code, .font-mono, kbd { font-family: "D2Coding", "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace; }
-  .sentence-original { font-family: "Source Serif 4", "Noto Serif KR", Georgia, serif; font-feature-settings: "liga", "kern"; }
+  /* 본문 글자크기 — html data-fontsize 속성으로 제어 */
+  :root { --fs-body: 1.125rem; }
+  [data-fontsize="sm"] { --fs-body: 1rem; }
+  [data-fontsize="md"] { --fs-body: 1.125rem; }
+  [data-fontsize="lg"] { --fs-body: 1.375rem; }
+  .sentence-original {
+    font-family: "Source Serif 4", "Noto Serif KR", Georgia, serif;
+    font-feature-settings: "liga", "kern";
+    font-size: var(--fs-body);
+  }
   .chunk-pipe { color: #94a3b8; margin: 0 .35rem; }
   .vocab-underline { border-bottom: 1px dotted #94a3b8; cursor: help; }
   details > summary { list-style: none; cursor: pointer; }
@@ -51,6 +60,7 @@
   @keyframes fadeIn { from { opacity:0; transform: translateY(-2px);} to {opacity:1; transform:none;} }
 </style>
 </head>
+<script>document.documentElement.setAttribute('data-fontsize', localStorage.getItem('engreader:fontsize') || 'md');</script>
 <body class="h-full bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
 
 <div class="flex h-screen">
@@ -114,6 +124,12 @@
     <div class="border-t border-slate-200 dark:border-slate-800 p-2 space-y-0.5 text-sm">
       <a class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">⭐ <span>Bookmarks</span><span class="ml-auto text-xs text-slate-400">14</span></a>
       <a class="flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">📚 <span>Vocab</span><span class="ml-auto text-xs text-slate-400">87</span></a>
+      <div class="flex items-center gap-1 px-2 py-1.5" role="group" aria-label="본문 글자크기">
+        <span class="text-xs text-slate-500 mr-1">크기</span>
+        <button data-size="sm" onclick="setFontSize('sm')" aria-label="작게" class="fs-btn text-xs w-7 h-7 rounded grid place-items-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">가</button>
+        <button data-size="md" onclick="setFontSize('md')" aria-label="보통" class="fs-btn text-sm w-7 h-7 rounded grid place-items-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">가</button>
+        <button data-size="lg" onclick="setFontSize('lg')" aria-label="크게" class="fs-btn text-base w-7 h-7 rounded grid place-items-center text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">가</button>
+      </div>
       <button onclick="document.documentElement.classList.toggle('dark')" class="w-full flex items-center gap-2 px-2 py-1.5 rounded hover:bg-slate-100 dark:hover:bg-slate-800">
         🌙 <span>Theme</span>
       </button>
@@ -149,7 +165,7 @@
       <section class="group rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-5 shadow-sm hover:shadow-md transition-shadow" data-stage="0">
         <div class="flex items-start gap-3">
           <span class="text-xs font-mono text-slate-400 mt-1.5 w-6 shrink-0">S1</span>
-          <p class="sentence-original text-lg leading-relaxed flex-1">
+          <p class="sentence-original leading-relaxed flex-1">
             Despite the heavy rain, the climbers <span class="vocab-underline" title="press on: 어려움에도 계속 나아가다">pressed on</span> toward the <span class="vocab-underline" title="summit: 정상">summit</span>.
           </p>
           <div class="flex items-center gap-1 opacity-60 group-hover:opacity-100 transition-opacity">
@@ -166,7 +182,7 @@
       <section class="group rounded-xl border border-indigo-200 dark:border-indigo-500/30 bg-white dark:bg-slate-900 p-5 shadow-sm" data-stage="1">
         <div class="flex items-start gap-3">
           <span class="text-xs font-mono text-slate-400 mt-1.5 w-6 shrink-0">S2</span>
-          <p class="sentence-original text-lg leading-relaxed flex-1">
+          <p class="sentence-original leading-relaxed flex-1">
             The negotiations, however, made little progress as delegates remained <span class="vocab-underline" title="entrenched: 굳어진">entrenched</span> in their positions.
           </p>
           <div class="flex items-center gap-1">
@@ -208,7 +224,7 @@
       <section class="group rounded-xl border border-purple-200 dark:border-purple-500/30 bg-white dark:bg-slate-900 p-5 shadow-md" data-stage="2">
         <div class="flex items-start gap-3">
           <span class="text-xs font-mono text-slate-400 mt-1.5 w-6 shrink-0">S3</span>
-          <p class="sentence-original text-lg leading-relaxed flex-1">
+          <p class="sentence-original leading-relaxed flex-1">
             What had begun as a routine <span class="vocab-underline" title="summit: 정상회담">summit</span> quickly <span class="vocab-underline" title="devolve into: ~로 전락하다">devolved into</span> a diplomatic standoff.
           </p>
           <div class="flex items-center gap-1">
@@ -273,6 +289,8 @@
         <span class="mx-2">·</span>
         <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono">j/k</kbd> 다음/이전
         <span class="mx-2">·</span>
+        <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono">+/-</kbd> 글자 크기
+        <span class="mx-2">·</span>
         <kbd class="px-1.5 py-0.5 rounded bg-slate-200 dark:bg-slate-800 font-mono">?</kbd> 도움말
       </div>
 
@@ -314,7 +332,31 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'e') document.querySelectorAll('section[data-stage]').forEach(s => setStage(s.querySelector('.reveal-btn'), 2));
     if (e.key === 'c') document.querySelectorAll('section[data-stage]').forEach(s => setStage(s.querySelector('.reveal-btn'), 0));
+    if (e.key === '+' || e.key === '=') cycleFontSize(1);
+    if (e.key === '-' || e.key === '_') cycleFontSize(-1);
   });
+
+  // font size
+  const FS_ORDER = ['sm', 'md', 'lg'];
+  function setFontSize(size) {
+    document.documentElement.setAttribute('data-fontsize', size);
+    localStorage.setItem('engreader:fontsize', size);
+    document.querySelectorAll('.fs-btn').forEach(btn => {
+      const active = btn.dataset.size === size;
+      btn.classList.toggle('bg-indigo-100', active);
+      btn.classList.toggle('text-indigo-700', active);
+      btn.classList.toggle('dark:bg-indigo-500/20', active);
+      btn.classList.toggle('dark:text-indigo-300', active);
+      btn.classList.toggle('text-slate-500', !active);
+    });
+  }
+  function cycleFontSize(direction) {
+    const cur = document.documentElement.getAttribute('data-fontsize') || 'md';
+    const i = FS_ORDER.indexOf(cur);
+    setFontSize(FS_ORDER[(i + direction + FS_ORDER.length) % FS_ORDER.length]);
+  }
+  // initialize active button on load
+  setFontSize(document.documentElement.getAttribute('data-fontsize') || 'md');
 </script>
 </body>
 </html>
