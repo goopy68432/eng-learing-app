@@ -28,10 +28,8 @@ yarn-error.log*
 # bkit
 .bkit
 
-# user content (저작권 보호 — 샘플만 커밋)
-content/*
-!content/samples/
-!content/samples/**
+# user content (저작권 보호 — 모두 로컬 전용)
+content/
 
 # tests
 coverage

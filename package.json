@@ -10,7 +10,9 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "e2e": "playwright test"
+    "e2e": "playwright test",
+    "build:ghpages": "GH_PAGES=1 next build",
+    "deploy": "pnpm build:ghpages && touch out/.nojekyll && gh-pages -d out -b gh-pages -m \"deploy: $(date -u +%Y-%m-%dT%H:%M:%SZ)\" --dotfiles"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -36,6 +38,7 @@
     "autoprefixer": "^10.4.0",
     "eslint": "^9.0.0",
     "eslint-config-next": "15.0.0",
+    "gh-pages": "^6.3.0",
     "jsdom": "^25.0.0",
     "postcss": "^8.4.0",
     "serve": "^14.2.6",

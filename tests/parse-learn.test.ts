@@ -4,7 +4,7 @@ import path from 'node:path';
 import { parseLearnMd } from '@/lib/parse-learn';
 
 const fixture = readFileSync(
-  path.resolve(__dirname, '../content/samples/news/climate-2026.learn.md'),
+  path.resolve(__dirname, './fixtures/news/climate-2026.learn.md'),
   'utf8'
 );
 

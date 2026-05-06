@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 import path from 'node:path';
 import { loadAllContent } from '@/lib/content';
 
-const root = path.resolve(__dirname, '../content/samples');
+const root = path.resolve(__dirname, './fixtures');
 
 describe('loadAllContent', () => {
   it('finds 2 docs (paired and unpaired)', async () => {
